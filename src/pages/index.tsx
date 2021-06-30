@@ -1,8 +1,8 @@
 import { Box, Button, Card, CardContent, CircularProgress, Grid, Step, StepLabel, Stepper } from '@material-ui/core';
-import { Field, Form, Formik, FormikConfig, FormikValues } from 'formik';
+import { Field, FieldArray, Form, Formik, FormikConfig, FormikValues } from 'formik';
 import { CheckboxWithLabel, TextField } from 'formik-material-ui';
-import React, { useState } from 'react';
-import { mixed, number, object } from 'yup';
+import React, { Fragment, useState } from 'react';
+import { array, mixed, number, object, string } from 'yup';
 
 const sleep = (time) => new Promise((acc) => setTimeout(acc, time));
 
@@ -17,6 +17,7 @@ export default function Home() {
             millionaire: false,
             money: 0,
             description: '',
+            suggestions: [],
           }}
           onSubmit={async (values) => {
             await sleep(3000);
@@ -63,6 +64,41 @@ export default function Home() {
                 label="All the money I have"
               />
             </Box>
+          </FormikStep>
+          <FormikStep
+            label="Purchases"
+            validationSchema={
+                object().shape({
+                    suggestions: array()
+                        .of(
+                            string().required().min(1).label("Suggestion")
+                        )
+                })
+            }>
+            <Fragment>What do you spend your money on?</Fragment>
+            <FieldArray
+                name="suggestions"
+                render={arrayHelpers => (
+                    <div>
+                        {(arrayHelpers.form.values.suggestions.map((suggestion, index) => (
+                            <div key={index}>
+                                <Field name={`suggestions.${index}`} />
+                                <button
+                                    type="button"
+                                    onClick={() => arrayHelpers.remove(index)} // remove a friend from the list
+                                >
+                                    -
+                                </button>
+                            </div>
+                        ))
+                        )}
+
+                        <button type="button" onClick={() => arrayHelpers.push('')}>
+                            {/* show this when user has removed all suggestions from the list */}
+                            Add another suggestion
+                        </button>
+                    </div>
+                )} />
           </FormikStep>
           <FormikStep label="More Info">
             <Box paddingBottom={2}>
